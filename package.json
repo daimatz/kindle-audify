@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^3.2.0",
+    "@google-cloud/vision": "^2.3.1",
+    "mp3-concat": "^0.1.2"
+  },
+  "name": "pdf-audify",
+  "version": "0.1.0",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ocr": "node ocr.js",
+    "tss": "node tss.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/daimatz/pdf-audify.git"
+  },
+  "author": "daimatz",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/daimatz/pdf-audify#readme",
+  "description": ""
+}
