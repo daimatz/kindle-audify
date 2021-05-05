@@ -1,0 +1,135 @@
+<body>
+  <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+  <div>
+    page:
+    <button onclick="pageDom.value = Math.max(1, parseInt(pageDom.value, 10)-1); renderPdf();">&lt;prev</button>
+    <input type="text" id="page" value="1" size="4" onchange="renderPdf()" />
+    <button onclick="pageDom.value = Math.min(pdfDoc.numPages, parseInt(pageDom.value, 10)+1); renderPdf();">next&gt;</button>
+    scale (%):
+    <button onclick="scaleDom.value = Math.max(10, parseInt(scaleDom.value, 10)-10); renderPdf();">-</button>
+    <input type="text" id="scale" value="80" size="4" onchange="renderPdf()" />
+    <button onclick="scaleDom.value = Math.min(100, parseInt(scaleDom.value, 10)+10); renderPdf();">+</button>
+  </div>
+  <div>
+    current size: <span id="current_size"></span> (original: <span id="original_size"></span>)
+  </div>
+  <div>
+    selected area: <span id="selected_area"></span> (original: <span id="original_area"></span>)
+  </div>
+  <div>
+    convert arg: <input id="convert_arg" size="32" onclick="this.select();"></span>
+  </div>
+  <div style="margin-top: 2em; position: relative;">
+    <canvas style="position: absolute; left: 0; top: 0;" id="pdf"></canvas>
+    <canvas style="position: absolute; left: 0; top: 0;" id="rect"></canvas>
+  </div>
+  <script>
+var pdfUrl = decodeURIComponent(location.search.substring(location.search.indexOf('/')));
+
+var pdfDoc = null;
+var pdfjsLib = window['pdfjs-dist/build/pdf'];
+pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+var pageDom = document.getElementById('page');
+var scaleDom = document.getElementById('scale');
+var renderPdf = function() {
+  pageNumber = parseInt(pageDom.value, 10);
+  scalePercent = parseInt(scaleDom.value, 10);
+  var onload = function(pdfDoc_) {
+    pdfDoc = pdfDoc_;
+    return pdfDoc_.getPage(pageNumber).then(function(page) {
+      var original = page.getViewport({scale: 1});
+      document.getElementById('original_size').innerText = original.width + 'x' + original.height;
+
+      var scale = scalePercent / 100;
+      var viewport = page.getViewport({scale: scale});
+      document.getElementById('current_size').innerText = viewport.width + 'x' + viewport.height;
+
+      var pdf = document.getElementById('pdf');
+      pdf.height = viewport.height;
+      pdf.width = viewport.width;
+      var rect = document.getElementById('rect');
+      rect.height = pdf.height;
+      rect.width = pdf.width;
+      var renderContext = {
+        canvasContext: pdf.getContext('2d'),
+        viewport: viewport
+      };
+      page.render(renderContext);
+    });
+  };
+  if (pdfDoc) {
+    return onload(pdfDoc);
+  } else {
+    return pdfjsLib.getDocument(pdfUrl).promise.then(onload, function (reason) {
+      console.error(reason);
+    });
+  }
+};
+
+window.onload = function() {
+  var rect = document.getElementById('rect');
+  var context = rect.getContext('2d');
+  var reacts = [];
+
+  rect.addEventListener("mousedown", onMouseDown, false);
+  rect.addEventListener("mouseup" , onMouseUp , false);
+
+  // 矩形オブジェクト
+  var _rectangle = createRect();
+
+  function createRect() {
+    return { startY:0, startX:0, endY:0, endX:0 };
+  }
+
+  function onMouseDown (e) {
+    _rectangle.startY = e.layerY;
+    _rectangle.startX = e.layerX;
+    rect.addEventListener ("mousemove", onMouseMove, false);
+  }
+  function onMouseMove (e) {
+    draw();
+    _rectangle.endY = e.layerY - _rectangle.startY;
+    _rectangle.endX = e.layerX - _rectangle.startX;
+    context.lineWidth = 3;
+    context.strokeStyle = "rgb(255, 0, 0)";
+    context.strokeRect (_rectangle.startX, _rectangle.startY, _rectangle.endX, _rectangle.endY);
+  }
+  function onMouseUp (e) {
+    draw();
+    _rectangle = createRect();
+    rect.removeEventListener ("mousemove", onMouseMove, false);
+  }
+
+  function normalize(r) {
+    return {
+      startX: Math.floor(Math.min(r.startX, r.startX + r.endX)),
+      startY: Math.floor(Math.min(r.startY, r.startY + r.endY)),
+      endX: Math.floor(Math.max(r.startX, r.startX + r.endX)),
+      endY: Math.floor(Math.max(r.startY, r.startY + r.endY)),
+    };
+  }
+
+  function draw() {
+    context.clearRect(0, 0, rect.width, rect.height);
+    context.lineWidth = 3;
+    context.strokeStyle = "rgb(255, 0, 0)";
+    var r = _rectangle;
+    context.strokeRect(r.startX, r.startY, r.endX, r.endY);
+
+    var n = normalize(_rectangle);
+    if (n.endX * n.endY === 0) {
+      document.getElementById('selected_area').innerText = '';
+    } else {
+      document.getElementById('selected_area').innerText = '(' + n.startX + ', ' + n.startY + ') - (' + n.endX + ', ' + n.endY + ')';
+      var s = parseInt(scaleDom.value, 10) / 100;
+      var t = {startX: Math.floor(n.startX/s), startY: Math.floor(n.startY/s), endX: Math.floor(n.endX/s), endY: Math.floor(n.endY/s)};
+      document.getElementById('original_area').innerText = '(' + t.startX + ', ' + t.startY + ') - (' + t.endX + ', ' + t.endY + ')';
+      document.getElementById('convert_arg').value = (t.endX-t.startX)+'x'+(t.endY-t.startY)+'+'+t.startX+'+'+t.startY;
+    }
+  };
+};
+
+renderPdf();
+</script>
+</body>
