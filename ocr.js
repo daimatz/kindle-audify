@@ -1,15 +1,17 @@
 // Imports the Google Cloud client libraries
 const vision = require('@google-cloud/vision').v1;
 
+const path = require('path');
+
 // Creates a client
 const client = new vision.ImageAnnotatorClient();
 
 // Bucket where the file resides
 const bucketName = 'pdf-audify';
 // Path to PDF file within bucket
-const fileName = 'pdf/cropped.pdf';
+const fileName = 'pdf/爆速成長マネジメント (Japanese Edition).pdf';
 // The folder to store the results
-const outputPrefix = 'json'
+const outputPrefix = 'json/' + path.basename(fileName, '.pdf')
 
 const gcsSourceUri = `gs://${bucketName}/${fileName}`;
 const gcsDestinationUri = `gs://${bucketName}/${outputPrefix}/`;
