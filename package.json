@@ -4,16 +4,17 @@
     "@google-cloud/text-to-speech": "^3.2.0",
     "@google-cloud/vision": "^2.3.1",
     "async": "^3.2.0",
-    "mp3-concat": "^0.1.2"
+    "mp3-concat": "^0.1.2",
+    "p-limit": "^3.1.0",
+    "typescript": "^4.2.4"
   },
   "name": "pdf-audify",
   "version": "0.1.0",
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ocr": "node ocr.js",
-    "tss": "node tss.js",
-    "concat": "node concat.js"
+    "build": "tsc",
+    "app": "node app.js"
   },
   "repository": {
     "type": "git",
