@@ -3,7 +3,10 @@
     "target": "es5",
     "lib": [
       "es2019"
-    ]
+    ],
+    "outDir": "build/"
   },
-  "files": [ "app.ts" ]
+  "include": [
+    "ts/**/*.ts"
+  ]
 }
