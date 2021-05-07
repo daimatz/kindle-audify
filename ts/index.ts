@@ -1,9 +1,8 @@
 import { main } from './main';
 
-exports.PdfAudify = (file, context) => {
-  console.log(JSON.stringify(context));
-  console.log(JSON.stringify(file));
+exports.PdfAudify = async (file, context) => {
+  console.log('file: ' + file.name);
   if (file.name.match(/\.pdf$/)) {
-    main(file.name);
+    await main(file.name);
   }
 };

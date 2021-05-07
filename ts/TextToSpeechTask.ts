@@ -1,4 +1,5 @@
 import { GcsLib } from './GcsLib';
+const promiseRetry = require('promise-retry');
 const PLimit = require('p-limit');
 const TextToSpeech = require('@google-cloud/text-to-speech');
 
@@ -7,7 +8,7 @@ export class TextToSpeechTask {
   private readonly client: typeof TextToSpeech.TextToSpeechClient;
   private readonly languageCode: string;
   private readonly delimiter: string;
-  private readonly maxConcurrency = 4;
+  private readonly maxConcurrency = 8;
   private readonly maxLength = 5000;
 
   constructor(gcs: GcsLib, languageCode: string, delimiter: string) {
@@ -49,7 +50,13 @@ export class TextToSpeechTask {
         if (existFiles.some(f => f.endsWith(outputPath))) {
           return Promise.resolve(outputPath);
         } else {
-          return this.ttsRequest(text, outputPath);
+          return promiseRetry((retry, num) => {
+            if (num > 5) {
+              return Promise.reject(`gave up after ${num-1} retry`);
+            } else {
+              return this.ttsRequest(text, outputPath).catch(retry);
+            }
+          });
         }
       }));
     }
