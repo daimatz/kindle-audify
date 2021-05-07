@@ -1,6 +1,3 @@
-import { Readable, Writable } from 'stream';
-import { Bucket, Storage } from '@google-cloud/storage';
-
 import { GcsLib } from './GcsLib';
 import { OcrTask } from './OcrTask';
 import { TextToSpeechTask } from './TextToSpeechTask';
