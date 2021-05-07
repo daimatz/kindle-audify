@@ -14,7 +14,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "app": "node build/main.js"
+    "local": "node build/run-local.js"
   },
   "repository": {
     "type": "git",
