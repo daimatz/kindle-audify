@@ -23,35 +23,15 @@ export class TextToSpeechTask {
     const existFiles = await this.gcs.listFiles(outputPrefix);
     const textsList = await Promise.all(gcsPaths.map(paths => this.readOcrOuputJson(paths)));
     const texts = textsList.flat();
-    let text = '';
-    let num = 0;
     const limit = PLimit(this.maxConcurrency);
     const promises: Array<Promise<string>> = [];
-    for (let i = 0; i < texts.length; i++) {
-      const t = texts[i];
-      if ((text + t).length > this.maxLength) {
-        const outputPath = this.getOutputPath(outputPrefix, ++num);
-        const chunk = JSON.parse(JSON.stringify(text));
-        promises.push(limit(() => {
-          if (existFiles.some(f => f.endsWith(outputPath))) {
-            return Promise.resolve(outputPath);
-          } else {
-            return promiseRetry((retry, count) => {
-              if (count > 5) {
-                return Promise.reject(`gave up after ${count-1} retry`);
-              } else {
-                return this.ttsRequest(chunk, outputPath).catch(retry);
-              }
-            });
-          }
-        }));
-        text = '';
-      }
-      text += t;
-    }
-    if (text.length > 0) {
+
+    let num = 0;
+    let i = 0;
+    while (i < texts.length) {
+      const chunk = this.takeChunk(texts, i);
+
       const outputPath = this.getOutputPath(outputPrefix, ++num);
-      const chunk = JSON.parse(JSON.stringify(text));
       promises.push(limit(() => {
         if (existFiles.some(f => f.endsWith(outputPath))) {
           return Promise.resolve(outputPath);
@@ -60,13 +40,26 @@ export class TextToSpeechTask {
             if (count > 5) {
               return Promise.reject(`gave up after ${count-1} retry`);
             } else {
-              return this.ttsRequest(chunk, outputPath).catch(retry);
+              return this.ttsRequest(chunk[0], outputPath).catch(retry);
             }
           });
         }
       }));
+      i = chunk[1];
     }
     return Promise.all(promises);
+  }
+
+  takeChunk(texts: Array<string>, index: number): [string, number] {
+    let text = '';
+    for (let i = index; i < texts.length; i++) {
+      const t = texts[i];
+      if ((text + t).length > this.maxLength) {
+        return [text, i];
+      }
+      text += t;
+    }
+    return [text, texts.length];
   }
 
   getOutputPath(prefix: string, num: number): string {
