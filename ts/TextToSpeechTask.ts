@@ -36,7 +36,13 @@ export class TextToSpeechTask {
           if (existFiles.some(f => f.endsWith(outputPath))) {
             return Promise.resolve(outputPath);
           } else {
-            return this.ttsRequest(chunk, outputPath);
+            return promiseRetry((retry, num) => {
+              if (num > 5) {
+                return Promise.reject(`gave up after ${num-1} retry`);
+              } else {
+                return this.ttsRequest(text, outputPath).catch(retry);
+              }
+            });
           }
         }));
         text = '';
