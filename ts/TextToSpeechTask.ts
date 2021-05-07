@@ -29,23 +29,16 @@ export class TextToSpeechTask {
     const promises: Array<Promise<string>> = [];
     for (let i = 0; i < texts.length; i++) {
       const t = texts[i];
-      let flag = false;
       if ((text + t).length > this.maxLength) {
-        flag = true;
-      } else if (i === texts.length-1) {
-        text += t;
-        flag = true;
-      }
-      if (flag) {
         const outputPath = this.getOutputPath(outputPrefix, ++num);
         const chunk = JSON.parse(JSON.stringify(text));
         promises.push(limit(() => {
           if (existFiles.some(f => f.endsWith(outputPath))) {
             return Promise.resolve(outputPath);
           } else {
-            return promiseRetry((retry, num) => {
-              if (num > 5) {
-                return Promise.reject(`gave up after ${num-1} retry`);
+            return promiseRetry((retry, count) => {
+              if (count > 5) {
+                return Promise.reject(`gave up after ${count-1} retry`);
               } else {
                 return this.ttsRequest(chunk, outputPath).catch(retry);
               }
@@ -55,6 +48,23 @@ export class TextToSpeechTask {
         text = '';
       }
       text += t;
+    }
+    if (text.length > 0) {
+      const outputPath = this.getOutputPath(outputPrefix, ++num);
+      const chunk = JSON.parse(JSON.stringify(text));
+      promises.push(limit(() => {
+        if (existFiles.some(f => f.endsWith(outputPath))) {
+          return Promise.resolve(outputPath);
+        } else {
+          return promiseRetry((retry, count) => {
+            if (count > 5) {
+              return Promise.reject(`gave up after ${count-1} retry`);
+            } else {
+              return this.ttsRequest(chunk, outputPath).catch(retry);
+            }
+          });
+        }
+      }));
     }
     return Promise.all(promises);
   }
