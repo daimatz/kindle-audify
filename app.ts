@@ -104,8 +104,9 @@ class OcrTask {
     console.log(`OcrTask.run(${inputFilePath}, ${outputPrefix})`);
     return this.gcs.listFiles(outputPrefix).then(listFiles => {
       if (listFiles.length > 0) {
-        console.log(`already exists: ${listFiles}`);
-        return listFiles;
+        const res = listFiles.sort((a, b) => this.ord(a) - this.ord(b));
+        console.log(`already exists: ${res}`);
+        return res;
       } else {
         // const outputPrefix = 'json/' + path.basename(fileName, '.pdf')
         const gcsSourceUri = `gs://${this.gcs.getBucketName()}/${inputFilePath}`;
@@ -129,13 +130,14 @@ class OcrTask {
           const destinationUri = res.responses[0].outputConfig.gcsDestination.uri;
           console.log('json saved to: ' + destinationUri);
           return this.gcs.listFiles(outputPrefix)
-            .then(files => files.sort((a, b,) => this.ord(a) - this.ord(b)));
+            .then(files => files.sort((a, b) => this.ord(a) - this.ord(b)));
         });
       }
     });
   }
   ord(name: string): number {
-    return parseInt(name.replace(/^.*?([0-9]+).*$/, '$1'), 10);
+    const basename = require('path').basename(name);
+    return parseInt(basename.replace(/^.*?-([0-9]+)-.*$/, '$1'), 10);
   }
 }
 
@@ -223,9 +225,6 @@ class TextToSpeechTask {
     console.log(`TextToSpeechTask.run(${JSON.stringify(gcsPaths)}, ${outputPrefix})`);
     const existFiles = await this.gcs.listFiles(outputPrefix);
     const textsList = await Promise.all(gcsPaths.map(paths => this.readOcrOuputJson(paths)));
-
-    console.log(JSON.stringify(textsList));
-    if (1) { process.exit(1); }
     const texts = textsList.flat();
     let text = '';
     let num = 0;
@@ -287,25 +286,48 @@ class TextToSpeechTask {
   readOcrOuputJson(gcsPath: string): Promise<Array<string>> {
     console.log(`TextToSpeechTask.readOcrOuputJson(${gcsPath})`);
     return this.gcs.readGcsFileString(gcsPath).then(str => {
-      const obj = JSON.parse(str);
-      const ary = obj.responses.map(x => {
-        return x.fullTextAnnotation ? x.fullTextAnnotation.pages.map(x => {
-          return x.blocks.map(x => {
-            return x.paragraphs.map(x => {
-              return x.words.map(x => {
-                return x.symbols.map(x => x.text);
+      const obj = JSON.parse(str) as OcrResult.Root;
+      return this.splitSentences(obj);
+    }).then(sentencesList => sentencesList.flat());
+  }
+
+  splitSentences(result: OcrResult.Root): Array<string> {
+    const pages: Array<Array<WordLevelText>> = [];
+    result.responses.forEach(a => {
+      if (a.fullTextAnnotation) {
+        a.fullTextAnnotation.pages.forEach(b => {
+          const words = [];
+          b.blocks.forEach(c => {
+            c.paragraphs.forEach(d => {
+              d.words.forEach(e => {
+                words.push({
+                  boundingBox: e.boundingBox,
+                  text: e.symbols.map(f => f.text).join(''),
+                });
               });
             });
           });
-        }) : [];
-      });
-      return ary.flat().flat().flat().map(x => {
-        return x.map(x => {
-          return x.join("")
-        }).flat().join("");
-      }).map(x => {
-        return x.endsWith(this.delimiter) ? x : (x+this.delimiter);
-      });
+          pages.push(words);
+        });
+      }
+    });
+    const texts: Array<string> = [];
+    pages.forEach(words => {
+      const ymax = Math.max(...words.map(w => w.boundingBox.normalizedVertices.map(p => p.y)).flat());
+      for (let i = 0; i < words.length; i++) {
+        const text = words[i].text;
+        if (i < words.length-1) {
+          const currentYs = words[i].boundingBox.normalizedVertices.map(p => p.y);
+          const nextYs = words[i+1].boundingBox.normalizedVertices.map(p => p.y);
+          texts.push(
+            (currentYs.every(y => y < ymax * 0.9) && Math.min(...nextYs) < Math.max(...currentYs))
+            ? (text+this.delimiter): text
+          );
+        }
+      }
+    });
+    return texts.join('').split(this.delimiter).filter(x => x !== '').map(x => {
+      return x.endsWith(this.delimiter) ? x : (x+this.delimiter);
     });
   }
 }
@@ -316,7 +338,7 @@ const tts = new TextToSpeechTask(gcs, 'ja-JP', '。');
 const concat = new ConcatMp3Task(gcs);
 
 const gcsPath = process.argv[2];
-const basename = require('path').basename(gcsPath, '.pdf');
+const basename = require('path').basename(gcsPath.normalize(), '.pdf');
 (async () => {
   await ocr.run(gcsPath, `dev/json/${basename}`)
    .then(files => tts.run(files, `dev/mp3/${basename}`))
