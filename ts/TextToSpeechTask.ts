@@ -35,7 +35,7 @@ export class TextToSpeechTask {
           return Promise.resolve(outputPath);
         } else {
           return promiseRetry((retry, count) => {
-            if (count > 5) {
+            if (count > 100) {
               return Promise.reject(`gave up after ${count-1} retry`);
             } else {
               return this.ttsRequest(chunk[0], outputPath).catch(retry);
