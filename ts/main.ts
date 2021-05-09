@@ -8,7 +8,7 @@ export async function main(gcsPath: string) {
   const gcs = new GcsLib('pdf-audify');
   const ocr = new OcrTask(gcs);
   const ext = new ExtractTextTask(gcs, '。');
-  const tts = new TextToSpeechTask(gcs, 'ja-JP', '。');
+  const tts = new TextToSpeechTask(gcs, 'ja-JP-Standard-A', 'ja-JP', '。');
   const concat = new ConcatMp3Task(gcs);
 
   const basename = require('path').basename(gcsPath.normalize(), '.pdf');

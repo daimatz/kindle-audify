@@ -6,14 +6,16 @@ const TextToSpeech = require('@google-cloud/text-to-speech');
 export class TextToSpeechTask {
   private readonly gcs: GcsLib;
   private readonly client: typeof TextToSpeech.TextToSpeechClient;
+  private readonly voiceName: string;
   private readonly languageCode: string;
   private readonly delimiter: string;
   private readonly maxConcurrency = 8;
   private readonly maxLength = 5000;
 
-  constructor(gcs: GcsLib, languageCode: string, delimiter: string) {
+  constructor(gcs: GcsLib, voiceName: string, languageCode: string, delimiter: string) {
     this.gcs = gcs;
     this.client = new TextToSpeech.TextToSpeechClient();
+    this.voiceName = voiceName;
     this.languageCode = languageCode;
     this.delimiter = delimiter;
   }
@@ -70,7 +72,7 @@ export class TextToSpeechTask {
     console.log(`ttsRequest(..., ${outputPath})`);
     const request = {
       input: {text: text},
-      voice: {languageCode: this.languageCode, ssmlGender: 'NEUTRAL'},
+      voice: {name: this.voiceName, languageCode: this.languageCode, ssmlGender: 'NEUTRAL'},
       audioConfig: {audioEncoding: 'MP3'},
     };
     return this.client.synthesizeSpeech(request).then(([response]) => {
