@@ -19,12 +19,15 @@
   <div>
     convert arg: <input id="convert_arg" size="32" onclick="this.select();"></span>
   </div>
+  <button onclick="document.getElementById('convert_arg').select(); document.execCommand('copy'); window.close();">
+    Go!
+  </button>
   <div style="margin-top: 2em; position: relative;">
     <canvas style="position: absolute; left: 0; top: 0;" id="pdf"></canvas>
     <canvas style="position: absolute; left: 0; top: 0;" id="rect"></canvas>
   </div>
   <script>
-var pdfUrl = decodeURIComponent(location.search.substring(location.search.indexOf('/')));
+var pdfUrl = decodeURIComponent(location.search.substring(1));
 
 var pdfDoc = null;
 var pdfjsLib = window['pdfjs-dist/build/pdf'];
