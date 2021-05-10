@@ -15,12 +15,12 @@ Kindle をオーディオブック化するためのツール・アプリケー�
 このアプリケーションでは Google Cloud Platform の Cloud Vision API および Text-to-Speech API を使用します。そのため、 Google Cloud Platform 上に環境構築が必要です。
 
 1. [Google Cloud Platform](https://console.cloud.google.com/) の初期設定を済ませます。具体的には、請求情報などを登録してアカウントをアクティベート、 [gcloud コマンドラインツール](https://cloud.google.com/sdk/gcloud) のインストールと認証です。
-2. 新しくプロジェクトを作成します。 `gcloud projects create my-kindle-audify`
-3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。 `gsutil mb -p my-kindle-audify gs://my-kindle-audify-bucket`
-4. Cloud Console から [Cloud Build](https://console.cloud.google.com/cloud-build/) および [Cloud Functions](https://console.cloud.google.com/functions/) の API を有効化します。 `gcloud services enable cloudbuild.googleapis.com cloudfunctions.googleapis.com`
-5. リポジトリ内の `config.yaml.template` を `config.yaml` にコピーします。 `cp config.yaml.template `config.yaml`
+2. 新しくプロジェクトを作成します。<br />`gcloud projects create my-kindle-audify`
+3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。<br />`gsutil mb -p my-kindle-audify gs://my-kindle-audify-bucket`
+4. [Cloud Build](https://console.cloud.google.com/cloud-build/), [Cloud Functions](https://console.cloud.google.com/functions/), [Cloud Text-to-Speech](https://cloud.google.com/text-to-speech), [Cloud Vision](https://cloud.google.com/vision) の API を有効化します。<br />`gcloud services enable cloudbuild.googleapis.com cloudfunctions.googleapis.com texttospeech.googleapis.com vision.googleapis.com`
+5. リポジトリ内の `config.yaml.template` を `config.yaml` にコピーします。<br />`cp config.yaml.template `config.yaml`
 6. `config.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
-7. Cloud Functions にアプリケーションをデプロイします。 deploy コマンドの引数にハイフンを2つと対象のバケット名を指定してください。 `npm install && npm run build && npm run deploy -- my-kindle-audify-bucket`
+7. Cloud Functions にアプリケーションをデプロイします。 deploy コマンドの引数にハイフンを2つと対象のバケット名を指定してください。<br />`npm install && npm run build && npm run deploy -- my-kindle-audify-bucket`
 
 ## 2. ローカルマシンで書籍の内容を含む PDF ファイルを作成
 
