@@ -18,8 +18,8 @@ Kindle をオーディオブック化するためのツール・アプリケー�
 2. 新しくプロジェクトを作成します。<br />`gcloud projects create my-kindle-audify`
 3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。<br />`gsutil mb -p my-kindle-audify gs://my-kindle-audify-bucket`
 4. [Cloud Build](https://console.cloud.google.com/cloud-build/), [Cloud Functions](https://console.cloud.google.com/functions/), [Cloud Text-to-Speech](https://cloud.google.com/text-to-speech), [Cloud Vision](https://cloud.google.com/vision) の API を有効化します。<br />`gcloud services enable cloudbuild.googleapis.com cloudfunctions.googleapis.com texttospeech.googleapis.com vision.googleapis.com`
-5. リポジトリ内の `config.yaml.template` を `config.yaml` にコピーします。<br />`cp config.yaml.template config.yaml`
-6. `config.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
+5. リポジトリ内の `env.yaml.template` を `env.yaml` にコピーします。<br />`cp env.yaml.template env.yaml`
+6. `env.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
 7. Cloud Functions にアプリケーションをデプロイします。 deploy コマンドの引数にハイフンを2つと対象のバケット名を指定してください。<br />`npm install && npm run build && npm run deploy -- my-kindle-audify-bucket`
 
 ## 2. ローカルマシンで書籍の内容を含む PDF ファイルを作成
@@ -30,9 +30,9 @@ macOS では、リポジトリ内の KindleScreenshot.workflow という Automat
 
 ![Automator](https://raw.githubusercontent.com/daimatz/kindle-audify/master/automator.gif)
 
-1. ローカルに [ImageMagick](https://imagemagick.org/) をインストールします。 `brew install imagemagick`
-2. ホームディレクトリに `KindleScreenshot` というフォルダを作成します。 `mkdir -p ~/KindleScreenshot`
-3. このリポジトリに含まれる `marker.html` を作成した `KindleScreenshot` フォルダにコピーします。 `cp /path/to/kindle-audify/marker.html ~/KindleScreenshot`
+1. ローカルに [ImageMagick](https://imagemagick.org/) をインストールします。<br />`brew install imagemagick`
+2. ホームディレクトリに `KindleScreenshot` というフォルダを作成します。<br />`mkdir -p ~/KindleScreenshot`
+3. このリポジトリに含まれる `marker.html` を作成した `KindleScreenshot` フォルダにコピーします。<br />`cp /path/to/kindle-audify/marker.html ~/KindleScreenshot`
 4. Kindle.app を開き、書籍の初めのほう (オーディオブック化したい最初のページ) を表示します。
 5. このリポジトリの `KindleScreenshot.workflow` を開き、実行します。
 6. ImageMagick のパスを尋ねられます。 `which magick` で出力されたファイルを含むフォルダを指定してください。
