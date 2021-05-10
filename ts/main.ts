@@ -3,17 +3,27 @@ import { OcrTask } from './OcrTask';
 import { ExtractTextTask } from './ExtractTextTask';
 import { TextToSpeechTask } from './TextToSpeechTask';
 import { ConcatMp3Task } from './ConcatMp3Task';
+const yaml = require('js-yaml');
+const fs = require('fs');
+const path = require('path');
 
 export async function main(gcsPath: string) {
-  const gcs = new GcsLib('pdf-audify');
+  const config = yaml.load(fs.readFileSync('./config.yaml', 'utf8'));
+  if (!gcsPath.match(new RegExp(config.input_pdf_path_regexp))) {
+    console.log(`input path ${gcsPath} doesn't match to RegExp: ${config.input_pdf_path_regexp}`);
+    return;
+  }
+  return;
+
+  const gcs = new GcsLib(config.bucket_name);
   const ocr = new OcrTask(gcs);
-  const ext = new ExtractTextTask(gcs, '。');
-  const tts = new TextToSpeechTask(gcs, 'ja-JP-Standard-A', 'ja-JP', '。');
+  const ext = new ExtractTextTask(gcs, config.delimiter);
+  const tts = new TextToSpeechTask(gcs, config.voice_name, config.language_code, config.delimiter);
   const concat = new ConcatMp3Task(gcs);
 
-  const basename = require('path').basename(gcsPath.normalize(), '.pdf');
-  await ocr.run(gcsPath, `dev/json/${basename}`)
-   .then(files => ext.run(files))
-   .then(texts => tts.run(texts, `dev/mp3/${basename}`))
-   .then(files => concat.run(files, `dev/out/${basename}.mp3`));
+  const basename = path.parse(gcsPath.normalize()).name;
+  await ocr.run(gcsPath, `${config.temp_path}/json/${basename}`)
+    .then(files => ext.run(files))
+    .then(texts => tts.run(texts, `${config.temp_path}/mp3/${basename}`))
+    .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`));
 }

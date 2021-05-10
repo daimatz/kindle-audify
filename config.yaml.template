@@ -1,0 +1,31 @@
+# 注意：このファイルは文字コード UTF-8 で保存してください。
+---
+
+# 使用する Cloud Storage のバケット名。
+bucket_name: your-awesome-bucket-name
+
+# 変換対象の PDF を識別する正規表現。
+# JavaScript の new RegExp() の引数として使用されます。
+# Cloud Storage のバケット内において、アップロードされた PDF のパスがこの正規表現に一致したときに変換ジョブが実行されます。
+input_pdf_path_regexp: \.pdf$
+
+# Cloud Storage のバケット内において変換結果を出力するディレクトリのパス
+output_path: output
+
+# Cloud Storage のバケット内において使用する作業ディレクトリのパス
+temp_path: temp
+
+# Text-to-Speech API で指定する声の種類。
+# 指定できる名前は
+#   https://cloud.google.com/text-to-speech/docs/voices?hl=ja
+# を参照してください。
+voice_name: ja-JP-Standard-A
+
+# Text-to-Speech API で指定する言語。
+# 指定できる名前は
+#   https://cloud.google.com/text-to-speech/docs/voices?hl=ja
+# を参照してください。
+language_code: ja-JP
+
+# language_code において指定した言語における区切り文字。
+delimiter: 。
