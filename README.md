@@ -18,15 +18,16 @@ Kindle をオーディオブック化するためのツール・アプリケー�
 2. [gcloud コマンドラインツール](https://cloud.google.com/sdk/gcloud) をインストールし、対象のアカウントで認証を済ませます。 `gcloud init`
 3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。 `gsutil mb gs://my-kindle-audify-bucket`
 4. Cloud Console から [Cloud Build]() および [Cloud Functions]() の API を有効化します。
-5. リポジトリ内の `config.yaml.template` を `config.yaml` にコピーします。 `cp config.yaml.template `config.yaml`
-6. `config.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
+5. リポジトリ内の `env.yaml.template` を `env.yaml` にコピーします。 `cp env.yaml.template env.yaml`
+6. `env.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
 7. Cloud Functions にアプリケーションをデプロイします。 `npm run deploy`
 
 ## 2. ローカルマシンで書籍の内容を含む PDF ファイルを作成
 
 Kindle で表示している書籍のスクリーンショットをとります。そのスクリーンショットを**書籍の内容部分だけを抽出して**1つのPDFファイルにまとめます。
 
-macOS では Automator を使って自動でページめくりとスクリーンショットの撮影ができます。
+macOS では、リポジトリ内の KindleScreenshot.workflow という Automator アプリを使って自動でページめくりとスクリーンショットの撮影ができます。
+
 ![Automator](https://raw.githubusercontent.com/daimatz/kindle-audify/master/automator.gif)
 
 1. ローカルに [ImageMagick](https://imagemagick.org/) をインストールします。 `brew install imagemagick`
@@ -47,7 +48,7 @@ macOS では Automator を使って自動でページめくりとスクリーン
 上記 2. のステップで都度作成した PDF ファイルを Cloud Storage にアップロードすると、自動で Cloud Functions が起動して MP3 化されます。
 
 1. 作成した PDF ファイルを [Cloud Storage](https://console.cloud.google.com/storage/browser/) の当該バケットにアップロードします。
-2. 数分待つとオーディオブック化された MP3 ファイルが Cloud Storage 上の `config.yaml` で指定されたフォルダに作成されるので、ダウンロードしてください。
+2. 数分待つとオーディオブック化された MP3 ファイルが `env.yaml` で指定された Cloud Storage 上のフォルダに作成されるので、ダウンロードしてください。
 
 # 開発
 
