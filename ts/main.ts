@@ -3,12 +3,19 @@ import { OcrTask } from './OcrTask';
 import { ExtractTextTask } from './ExtractTextTask';
 import { TextToSpeechTask } from './TextToSpeechTask';
 import { ConcatMp3Task } from './ConcatMp3Task';
-const yaml = require('js-yaml');
-const fs = require('fs');
 const path = require('path');
 
-export async function main(gcsPath: string) {
-  const config = yaml.load(fs.readFileSync('./config.yaml', 'utf8'));
+export type Config = {
+  bucket_name: string
+  input_pdf_path_regexp: string
+  output_path: string
+  temp_path: string
+  voice_name: string
+  language_code: string
+  delimiter: string
+};
+
+export async function main(gcsPath: string, config: Config) {
   if (!gcsPath.match(new RegExp(config.input_pdf_path_regexp))) {
     console.log(`input path ${gcsPath} doesn't match to RegExp: ${config.input_pdf_path_regexp}`);
     return;
