@@ -16,11 +16,11 @@ export type Config = {
 };
 
 export async function main(gcsPath: string, config: Config) {
+  console.log(`gcsPath: ${gcsPath}, config: ${JSON.stringify(config)}`);
   if (!gcsPath.match(new RegExp(config.input_pdf_path_regexp))) {
     console.log(`input path ${gcsPath} doesn't match to RegExp: ${config.input_pdf_path_regexp}`);
     return;
   }
-  return;
 
   const gcs = new GcsLib(config.bucket_name);
   const ocr = new OcrTask(gcs);
