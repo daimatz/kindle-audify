@@ -16,7 +16,7 @@ Kindle をオーディオブック化するためのツール・アプリケー�
 
 1. [Google Cloud Platform](https://console.cloud.google.com/) の初期設定を済ませます。具体的には、請求情報などを登録してアカウントをアクティベート、 [gcloud コマンドラインツール](https://cloud.google.com/sdk/gcloud) のインストールと認証です。
 2. 新しくプロジェクトを作成します。<br />`gcloud projects create my-kindle-audify --set-as-default`
-3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。<br />`gsutil mb -p my-kindle-audify gs://my-kindle-audify-bucket`
+3. Cloud Storage 上に作業用のバケットを作成します。バケット名は世界で一意である必要があります。<br />`gsutil mb gs://my-kindle-audify-bucket`
 4. [Cloud Build](https://console.cloud.google.com/cloud-build/), [Cloud Functions](https://console.cloud.google.com/functions/), [Cloud Text-to-Speech](https://cloud.google.com/text-to-speech), [Cloud Vision](https://cloud.google.com/vision) の API を有効化します。<br />`gcloud services enable cloudbuild.googleapis.com cloudfunctions.googleapis.com texttospeech.googleapis.com vision.googleapis.com`
 5. リポジトリ内の `env.yaml.template` を `env.yaml` にコピーします。<br />`cp env.yaml.template env.yaml`
 6. `env.yaml` を自分の環境に合うように編集します。ファイル内のコメントを参考にしてください。
