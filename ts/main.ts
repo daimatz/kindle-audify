@@ -3,6 +3,7 @@ import { OcrTask } from './OcrTask';
 import { ExtractTextTask } from './ExtractTextTask';
 import { TextToSpeechTask } from './TextToSpeechTask';
 import { ConcatMp3Task } from './ConcatMp3Task';
+const promiseRetry = require('promise-retry');
 const path = require('path');
 
 export type Config = {
@@ -31,8 +32,10 @@ export async function main(gcsPath: string, config: Config) {
   const basename = path.parse(gcsPath.normalize()).name;
   const timestamp = new Date().getTime();
   const working_dir = `${config.temp_path}/${timestamp}_${basename}`;
-  await ocr.run(gcsPath, `${working_dir}/json`)
-    .then(files => ext.run(files))
-    .then(texts => tts.run(texts, `${working_dir}/mp3`))
-    .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`));
+  await promiseRetry((retry, count) => {
+    return ocr.run(gcsPath, `${working_dir}/json`)
+      .then(files => ext.run(files))
+      .then(texts => tts.run(texts, `${working_dir}/mp3`))
+      .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`));
+  }, { retries: 100, factor: 1 });
 }
