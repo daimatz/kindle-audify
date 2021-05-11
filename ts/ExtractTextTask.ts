@@ -1,5 +1,4 @@
 import { GcsLib } from './GcsLib';
-const PLimit = require('p-limit');
 
 export class ExtractTextTask {
   private readonly gcs: GcsLib;
@@ -13,11 +12,7 @@ export class ExtractTextTask {
 
   run(gcsPaths: Array<string>): Promise<Array<string>> {
     console.log(`ExtractTextTask.run(${JSON.stringify(gcsPaths)}`);
-    const limit = PLimit(this.maxConcurrency);
-    const promises: Array<Promise<string>> = [];
-    gcsPaths.forEach(path => {
-      promises.push(limit(() => this.readOcrOuputJson(path)))
-    });
+    const promises = gcsPaths.map(path => this.readOcrOuputJson(path));
     return Promise.all(promises).then(textList => textList.flat());
   }
 

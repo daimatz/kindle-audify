@@ -1,5 +1,4 @@
 import { GcsLib } from './GcsLib';
-const PLimit = require('p-limit');
 
 export class ConcatMp3Task {
   private readonly gcs: GcsLib;
@@ -17,14 +16,11 @@ export class ConcatMp3Task {
     if (files.length === 1) {
       return this.gcs.copy(files[0], outputPath).then(() => outputPath);
     }
-    const limit = PLimit(this.maxConcurrency);
     const promises: Array<Promise<string>> = [];
     for (let i = 0; i < files.length; i+=this.maxCombine) {
       const group = files.slice(i, i+this.maxCombine);
       const concatFilePath = this.getConcatFilePath(group);
-      promises.push(limit(() => {
-        return this.gcs.combine(group, concatFilePath, { contentType: 'audio/mpeg' }).then(() => concatFilePath);
-      }));
+      promises.push(this.gcs.combine(group, concatFilePath, { contentType: 'audio/mpeg' }).then(() => concatFilePath));
     }
     return Promise.all(promises).then(newFiles => {
       return this.run(newFiles, outputPath)

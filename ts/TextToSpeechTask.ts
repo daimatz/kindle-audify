@@ -1,6 +1,5 @@
 import { GcsLib } from './GcsLib';
 const promiseRetry = require('promise-retry');
-const PLimit = require('p-limit');
 const TextToSpeech = require('@google-cloud/text-to-speech');
 
 export class TextToSpeechTask {
@@ -23,7 +22,6 @@ export class TextToSpeechTask {
   run(texts: Array<string>, outputPrefix: string): Promise<Array<string>> {
     console.log(`TextToSpeechTask.run(..., ${outputPrefix})`);
     return this.gcs.listFiles(outputPrefix).then(existFiles => {
-      const limit = PLimit(this.maxConcurrency);
       const promises: Array<Promise<string>> = [];
 
       let num = 0;
@@ -32,15 +30,13 @@ export class TextToSpeechTask {
         const chunk = this.takeChunk(texts, i);
 
         const outputPath = this.getOutputPath(outputPrefix, ++num);
-        promises.push(limit(() => {
-          if (existFiles.some(f => f.endsWith(outputPath))) {
-            return Promise.resolve(outputPath);
-          } else {
-            return promiseRetry((retry, count) => {
-              return this.ttsRequest(chunk[0], outputPath).catch(retry);
-            }, { retries: 100, factor: 1.1 });
-          }
-        }));
+        if (existFiles.some(f => f.endsWith(outputPath))) {
+          promises.push(Promise.resolve(outputPath));
+        } else {
+          promises.push(promiseRetry((retry, count) => {
+            return this.ttsRequest(chunk[0], outputPath).catch(retry);
+          }, { retries: 100, factor: 1.1 }));
+        }
         i = chunk[1];
       }
       return Promise.all(promises);
