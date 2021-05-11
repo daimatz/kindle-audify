@@ -27,7 +27,7 @@ export class OcrTask {
         };
         const outputConfig = {
           gcsDestination: { uri: gcsDestinationUri },
-          batchSize: 10,
+          batchSize: 20,
         };
         const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
         const imageContext = { disableOrientationDetection: true };
