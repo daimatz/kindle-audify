@@ -38,5 +38,5 @@ export function main(gcsPath: string, config: Config): Promise<void> {
       .then(texts => tts.run(texts, `${working_dir}/mp3`))
       .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`))
       .then(() => void(0));
-  });
+  }, { retries: 3, factor: 1 });
 }
