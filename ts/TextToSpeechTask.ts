@@ -20,30 +20,31 @@ export class TextToSpeechTask {
     this.delimiter = delimiter;
   }
 
-  async run(texts: Array<string>, outputPrefix: string): Promise<Array<string>> {
+  run(texts: Array<string>, outputPrefix: string): Promise<Array<string>> {
     console.log(`TextToSpeechTask.run(..., ${outputPrefix})`);
-    const existFiles = await this.gcs.listFiles(outputPrefix);
-    const limit = PLimit(this.maxConcurrency);
-    const promises: Array<Promise<string>> = [];
+    return this.gcs.listFiles(outputPrefix).then(existFiles => {
+      const limit = PLimit(this.maxConcurrency);
+      const promises: Array<Promise<string>> = [];
 
-    let num = 0;
-    let i = 0;
-    while (i < texts.length) {
-      const chunk = this.takeChunk(texts, i);
+      let num = 0;
+      let i = 0;
+      while (i < texts.length) {
+        const chunk = this.takeChunk(texts, i);
 
-      const outputPath = this.getOutputPath(outputPrefix, ++num);
-      promises.push(limit(() => {
-        if (existFiles.some(f => f.endsWith(outputPath))) {
-          return Promise.resolve(outputPath);
-        } else {
-          return promiseRetry((retry, count) => {
-            return this.ttsRequest(chunk[0], outputPath).catch(retry);
-          }, { retries: 100, factor: 1.1 });
-        }
-      }));
-      i = chunk[1];
-    }
-    return Promise.all(promises);
+        const outputPath = this.getOutputPath(outputPrefix, ++num);
+        promises.push(limit(() => {
+          if (existFiles.some(f => f.endsWith(outputPath))) {
+            return Promise.resolve(outputPath);
+          } else {
+            return promiseRetry((retry, count) => {
+              return this.ttsRequest(chunk[0], outputPath).catch(retry);
+            }, { retries: 100, factor: 1.1 });
+          }
+        }));
+        i = chunk[1];
+      }
+      return Promise.all(promises);
+    });
   }
 
   takeChunk(texts: Array<string>, index: number): [string, number] {
