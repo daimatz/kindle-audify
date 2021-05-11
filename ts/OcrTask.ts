@@ -1,5 +1,4 @@
 import { GcsLib } from './GcsLib';
-const PLimit = require('p-limit');
 const ImageAnnotatorClient = require('@google-cloud/vision').v1.ImageAnnotatorClient;
 
 export class OcrTask {

@@ -1,8 +1,10 @@
 import { GcsLib } from './GcsLib';
+const PLimit = require('p-limit');
 
 export class ExtractTextTask {
   private readonly gcs: GcsLib;
   private readonly delimiter: string;
+  private readonly maxConcurrency = 4;
 
   constructor(gcs: GcsLib, delimiter: string) {
     this.gcs = gcs;
@@ -11,11 +13,16 @@ export class ExtractTextTask {
 
   run(gcsPaths: Array<string>): Promise<Array<string>> {
     console.log(`ExtractTextTask.run(${JSON.stringify(gcsPaths)}`);
-    return Promise.all(gcsPaths.map(paths => this.readOcrOuputJson(paths))).then(textList => textList.flat());
+    const limit = PLimit(this.maxConcurrency);
+    const promises: Array<Promise<string>> = [];
+    gcsPaths.forEach(path => {
+      promises.push(limit(() => this.readOcrOuputJson(path)))
+    });
+    return Promise.all(promises).then(textList => textList.flat());
   }
 
   readOcrOuputJson(gcsPath: string): Promise<Array<string>> {
-    console.log(`TextToSpeechTask.readOcrOuputJson(${gcsPath})`);
+    console.log(`ExtractTextTask.readOcrOuputJson(${gcsPath})`);
     return this.gcs.readGcsFileString(gcsPath).then(str => {
       const obj = JSON.parse(str) as OcrResult.Root;
       return this.splitSentences(obj);
