@@ -50,6 +50,11 @@ macOS では、リポジトリ内の KindleScreenshot.workflow という Automat
 1. 作成した PDF ファイルを [Cloud Storage](https://console.cloud.google.com/storage/browser/) の当該バケットにアップロードします。
 2. 数分待つとオーディオブック化された MP3 ファイルが `env.yaml` で指定された Cloud Storage 上のフォルダに作成されるので、ダウンロードしてください。
 
+## 注意
+
+一部の書籍 (10%ほど？) において OCR 処理でうまくテキストを抽出できないケースがあることがわかっています。
+画像切り抜きの方法などを調整したり Vision API のパラメータを調整するなどで修正できる可能性がありますが、現状ではできていません。
+
 # 開発
 
 Cloud IAM 上で以下の権限を持ったサービスアカウントを作成し、キーをダウンロードします。
