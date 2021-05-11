@@ -29,8 +29,10 @@ export async function main(gcsPath: string, config: Config) {
   const concat = new ConcatMp3Task(gcs);
 
   const basename = path.parse(gcsPath.normalize()).name;
-  await ocr.run(gcsPath, `${config.temp_path}/json/${basename}`)
+  const timestamp = new Date().getTime();
+  const working_dir = `${config.temp_path}/${timestamp}_${basename}`;
+  await ocr.run(gcsPath, `${working_dir}/json`)
     .then(files => ext.run(files))
-    .then(texts => tts.run(texts, `${config.temp_path}/mp3/${basename}`))
+    .then(texts => tts.run(texts, `${working_dir}/mp3`))
     .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`));
 }
