@@ -47,7 +47,11 @@ export class TextToSpeechTask {
     let text = '';
     for (let i = index; i < texts.length; i++) {
       const t = texts[i];
-      if ((text + t).length > this.maxLength) {
+      if (text.length + t.length > this.maxLength) {
+        if (text === '') {
+          text = t.substring(0, this.maxLength);
+          texts[i] = t.substring(this.maxLength);
+        }
         return [text, i];
       }
       text += t;
