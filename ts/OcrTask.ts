@@ -26,7 +26,10 @@ export class OcrTask {
           mimeType: 'application/pdf',
           gcsSource: { uri: gcsSourceUri },
         };
-        const outputConfig = { gcsDestination: { uri: gcsDestinationUri } };
+        const outputConfig = {
+          gcsDestination: { uri: gcsDestinationUri },
+          batchSize: 10,
+        };
         const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
         const imageContext = { disableOrientationDetection: true };
         const request = {
