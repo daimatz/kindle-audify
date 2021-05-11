@@ -28,12 +28,9 @@ export class OcrTask {
         };
         const outputConfig = { gcsDestination: { uri: gcsDestinationUri } };
         const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
+        const imageContext = { disableOrientationDetection: true };
         const request = {
-          requests: [{
-            inputConfig: inputConfig,
-            features: features,
-            outputConfig: outputConfig,
-          }],
+          requests: [{ inputConfig, features, imageContext, outputConfig }],
         };
         return this.client.asyncBatchAnnotateFiles(request).then(([operation]) => {
           return operation.promise();
