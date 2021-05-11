@@ -37,12 +37,8 @@ export class TextToSpeechTask {
           return Promise.resolve(outputPath);
         } else {
           return promiseRetry((retry, count) => {
-            if (count > 100) {
-              return Promise.reject(`gave up after ${count-1} retry`);
-            } else {
-              return this.ttsRequest(chunk[0], outputPath).catch(retry);
-            }
-          });
+            return this.ttsRequest(chunk[0], outputPath).catch(retry);
+          }, { retries: 100, factor: 1.1 });
         }
       }));
       i = chunk[1];
