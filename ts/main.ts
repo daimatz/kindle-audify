@@ -23,10 +23,14 @@ export function main(gcsPath: string, config: Config): Promise<void> {
     return;
   }
 
+  const voice_names = config.voice_name.split(',');
+  const index = Math.floor(Math.random()*voice_names.length);
+  const voice_name = voice_names[index].trim();
+
   const gcs = new GcsLib(config.bucket_name);
   const ocr = new OcrTask(gcs);
   const ext = new ExtractTextTask(gcs, config.delimiter);
-  const tts = new TextToSpeechTask(gcs, config.voice_name, config.language_code, config.delimiter);
+  const tts = new TextToSpeechTask(gcs, voice_name, config.language_code, config.delimiter);
   const concat = new ConcatMp3Task(gcs);
 
   const basename = path.parse(gcsPath.normalize()).name;
