@@ -1,5 +1,6 @@
 import { GcsLib } from './GcsLib';
 const ImageAnnotatorClient = require('@google-cloud/vision').v1.ImageAnnotatorClient;
+const path = require('path');
 
 export class OcrTask {
   private readonly gcs: GcsLib;
@@ -18,7 +19,6 @@ export class OcrTask {
         console.log(`already exists: ${res}`);
         return res;
       } else {
-        // const outputPrefix = 'json/' + path.basename(fileName, '.pdf')
         const gcsSourceUri = `gs://${this.gcs.getBucketName()}/${inputFilePath}`;
         const gcsDestinationUri = `gs://${this.gcs.getBucketName()}/${outputPrefix}/`;
         const inputConfig = {
@@ -39,15 +39,17 @@ export class OcrTask {
         }).then(([res]) => {
           const destinationUri = res.responses[0].outputConfig.gcsDestination.uri;
           console.log('json saved to: ' + destinationUri);
-          return this.gcs.listFiles(outputPrefix)
-            .then(files => files.sort((a, b) => this.ord(a) - this.ord(b)));
+          // TODO: Listing files immedeately sometimes causes lack of file. How to get stable?
+          const delay = ms => new Promise(x => setTimeout(x, ms));
+          return delay(10000).then(() => {
+            return this.gcs.listFiles(outputPrefix)
+          }).then(files => files.sort((a, b) => this.ord(a) - this.ord(b)));
         });
       }
     });
   }
   ord(name: string): number {
-    const basename = require('path').basename(name);
+    const basename = path.basename(name);
     return parseInt(basename.replace(/^.*?-([0-9]+)-.*$/, '$1'), 10);
   }
 }
-
