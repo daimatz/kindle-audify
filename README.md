@@ -36,14 +36,15 @@ macOS では、リポジトリ内の KindleScreenshot.workflow という Automat
 2. ホームディレクトリに `KindleScreenshot` というフォルダを作成します。<br />`mkdir -p ~/KindleScreenshot`
 3. このリポジトリに含まれる `marker.html` を作成した `KindleScreenshot` フォルダにコピーします。<br />`cp /path/to/kindle-audify/marker.html ~/KindleScreenshot`
 4. Kindle.app を開き、書籍の初めのほう (オーディオブック化したい最初のページ) を表示します。
-5. このリポジトリの `KindleScreenshot.workflow` を開き、実行します。
-6. ImageMagick のパスを尋ねられます。 `which magick` で出力されたファイルを含むフォルダを指定してください。
-7. 書籍のタイトルを尋ねられるので、入力します。
-8. Automator が Kindle アプリを自動で操作しながらスクリーンショットを撮影していきます。操作せずにお待ちください。
-9. しばらく待つと最終ページに辿り着きますが、 **'End Screenshots' という通知が表示されるまで操作しないでください。** 'End Screenshots' という通知が表示された後は操作をしても大丈夫です。
-11. その後しばらく経つとブラウザが起動し、撮影したスクリーンショットを含んだ PDFファイルが表示されます。
-12. PDF ファイル上で書籍の内容部分だけを含むよう矩形選択し、 Go! ボタンをクリックしてください。
-13. しばらく待つと選択された矩形部分だけを抽出した PDF ファイルが作成され、 Finder に表示されます。
+5. macOS の通知をオフ (Do not disturb) にします。
+6. このリポジトリの `KindleScreenshot.workflow` を開き、実行します。
+7. ImageMagick のパスを尋ねられます。 `which magick` で出力されたファイルを含むフォルダを指定してください。
+8. 書籍のタイトルを尋ねられるので、入力します。
+9. Automator が Kindle アプリを自動で操作しながらスクリーンショットを撮影していきます。操作せずにお待ちください。
+10. その後しばらく経つとブラウザが起動し、撮影したスクリーンショットを含んだ PDFファイルが表示されます。
+11. PDF ファイル上で書籍の内容部分だけを含むよう矩形選択し、 Go! ボタンをクリックしてください。
+12. しばらく待つと選択された矩形部分だけを抽出した PDF ファイルが作成され、 Finder に表示されます。
+13. 必要であれば macOS の通知を元に戻します。
 
 ## 3. Google Cloud Storage に PDF ファイルをアップロード
 
