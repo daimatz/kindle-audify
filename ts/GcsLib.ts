@@ -24,6 +24,12 @@ export class GcsLib {
         metadata: { contentType },
       })
   }
+  writeGcsFileString(content: string, path: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.writeStream(path, 'text/plain').end(content);
+      resolve();
+    });
+  }
   readStream(path: string): Readable {
     return this.bucket
       .file(path)

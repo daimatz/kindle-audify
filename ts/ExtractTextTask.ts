@@ -10,10 +10,12 @@ export class ExtractTextTask {
     this.delimiter = delimiter;
   }
 
-  run(gcsPaths: Array<string>): Promise<Array<string>> {
+  run(gcsPaths: Array<string>, outputPathPrefix: string): Promise<Array<string>> {
     console.log(`ExtractTextTask.run(${JSON.stringify(gcsPaths)}`);
     const promises = gcsPaths.map(path => this.readOcrOuputJson(path));
-    return Promise.all(promises).then(textList => textList.flat());
+    return Promise.all(promises).then((textsList: Array<Array<string>>) => {
+      return this.saveToGcs(textsList, outputPathPrefix).then(() => textsList.flat());
+    });
   }
 
   readOcrOuputJson(gcsPath: string): Promise<Array<string>> {
@@ -62,5 +64,10 @@ export class ExtractTextTask {
     return texts.join('').split(this.delimiter).filter(x => x !== '').map(x => {
       return x.endsWith(this.delimiter) ? x : (x+this.delimiter);
     });
+  }
+
+  saveToGcs(textsList: Array<Array<string>>, outputPathPrefix: string): Promise<void> {
+    const text = textsList.map(texts => texts.join('')).join("\n\n\n");
+    return this.gcs.writeGcsFileString(text, `${outputPathPrefix}/output.txt`);
   }
 }

@@ -38,7 +38,7 @@ export function main(gcsPath: string, config: Config): Promise<void> {
   const working_dir = `${config.temp_path}/${timestamp}_${basename}`;
   return promiseRetry((retry, count) => {
     return ocr.run(gcsPath, `${working_dir}/json`)
-      .then(files => ext.run(files))
+      .then(files => ext.run(files, `${working_dir}/text`))
       .then(texts => tts.run(texts, `${working_dir}/mp3`))
       .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`))
       .then(() => void(0));
