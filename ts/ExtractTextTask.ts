@@ -61,13 +61,32 @@ export class ExtractTextTask {
         }
       }
     });
-    return texts.join('').split(this.delimiter).filter(x => x !== '').map(x => {
-      return x.endsWith(this.delimiter) ? x : (x+this.delimiter);
-    });
+
+    const res = [];
+    let t = '';
+    for (let c of texts.join('')) {
+      t += c;
+      if (c === this.delimiter) {
+        res.push(t);
+        t = '';
+      }
+    }
+    res.push(t);
+    return res;
   }
 
   saveToGcs(textsList: Array<Array<string>>, outputPathPrefix: string): Promise<void> {
-    const text = textsList.map(texts => texts.join('')).join("\n\n\n");
-    return this.gcs.writeGcsFileString(text, `${outputPathPrefix}/output.txt`);
+    return new Promise((resolve, reject) => {
+      const w = this.gcs.writeStream(`${outputPathPrefix}/output.txt`, 'text/plain');
+      w.on('error', e => reject(e));
+      textsList.forEach(texts => {
+        texts.forEach(text => {
+          w.write(text);
+        });
+        w.write("\n\n\n");
+      });
+      w.end();
+      resolve();
+    });
   }
 }
