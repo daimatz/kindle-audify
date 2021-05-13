@@ -74,11 +74,7 @@ storage.objects.update
 
 ```sh
 npm install
-```
-
-で依存パッケージをインストール、
-
-```sh
+npm run build
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
 npm run local -- '/cloud-storage-path/to/pdf-file.pdf'
 ```
