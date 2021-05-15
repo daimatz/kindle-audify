@@ -19,10 +19,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/daimatz/pdf-audify.git"
+    "url": "git+ssh://git@github.com/daimatz/pdf-audify.git"
   },
   "author": "daimatz",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/daimatz/pdf-audify#readme",
+  "homepage": "https://github.com/daimatz/pdf-audify#readme",
   "description": ""
 }
