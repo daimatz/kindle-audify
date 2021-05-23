@@ -1,3 +1,4 @@
+import { Config } from './Config';
 import { GcsLib } from './GcsLib';
 import { OcrTask } from './OcrTask';
 import { ExtractTextTask } from './ExtractTextTask';
@@ -5,16 +6,6 @@ import { TextToSpeechTask } from './TextToSpeechTask';
 import { ConcatMp3Task } from './ConcatMp3Task';
 const promiseRetry = require('promise-retry');
 const path = require('path');
-
-export type Config = {
-  bucket_name: string
-  input_pdf_path_regexp: string
-  output_path: string
-  temp_path: string
-  voice_name: string
-  language_code: string
-  delimiter: string
-};
 
 export function main(gcsPath: string, config: Config): Promise<void> {
   console.log(`gcsPath: ${gcsPath}, config: ${JSON.stringify(config)}`);
@@ -30,7 +21,7 @@ export function main(gcsPath: string, config: Config): Promise<void> {
   const gcs = new GcsLib(config.bucket_name);
   const ocr = new OcrTask(gcs);
   const ext = new ExtractTextTask(gcs, config.delimiter);
-  const tts = new TextToSpeechTask(gcs, voice_name, config.language_code, config.delimiter);
+  const tts = new TextToSpeechTask(gcs, voice_name, config);
   const concat = new ConcatMp3Task(gcs);
 
   const basename = path.parse(gcsPath.normalize()).name;

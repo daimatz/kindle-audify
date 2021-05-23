@@ -1,5 +1,6 @@
-import { main, Config } from './main';
+import { Config } from './Config';
+import { main } from './main';
 
 exports.PdfAudify = async (file, context) => {
-  await main(file.name, process.env as Config);
+  await main(file.name, process.env as unknown as Config);
 };

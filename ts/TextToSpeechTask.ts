@@ -1,3 +1,4 @@
+import { Config } from './Config';
 import { GcsLib } from './GcsLib';
 const promiseRetry = require('promise-retry');
 const TextToSpeech = require('@google-cloud/text-to-speech');
@@ -6,17 +7,14 @@ export class TextToSpeechTask {
   private readonly gcs: GcsLib;
   private readonly client: typeof TextToSpeech.TextToSpeechClient;
   private readonly voiceName: string;
-  private readonly languageCode: string;
-  private readonly delimiter: string;
-  private readonly maxConcurrency = 8;
+  private readonly config: Config;
   private readonly maxLength = 5000;
 
-  constructor(gcs: GcsLib, voiceName: string, languageCode: string, delimiter: string) {
+  constructor(gcs: GcsLib, voiceName: string, config: Config) {
     this.gcs = gcs;
     this.client = new TextToSpeech.TextToSpeechClient();
     this.voiceName = voiceName;
-    this.languageCode = languageCode;
-    this.delimiter = delimiter;
+    this.config = config;
   }
 
   run(texts: Array<string>, outputPrefix: string): Promise<Array<string>> {
@@ -68,9 +66,20 @@ export class TextToSpeechTask {
   ttsRequest(text: string, outputPath: string): Promise<string> {
     console.log(`ttsRequest(..., ${outputPath})`);
     const request = {
-      input: {text: text},
-      voice: {name: this.voiceName, languageCode: this.languageCode, ssmlGender: 'NEUTRAL'},
-      audioConfig: {audioEncoding: 'MP3'},
+      input: {
+        text: text,
+      },
+      voice: {
+        name: this.voiceName,
+        languageCode: this.config.language_code,
+        ssmlGender: 'NEUTRAL',
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+        speakingRate: Number(this.config.speaking_rate) || null,
+        pitch: Number(this.config.pitch) || null,
+        volumeGainDb: Number(this.config.volume_gain_db) || null,
+      },
     };
     return this.client.synthesizeSpeech(request).then(([response]) => {
       return new Promise((resolve, reject) => {
