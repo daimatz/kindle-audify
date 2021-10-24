@@ -18,7 +18,8 @@
   <div>
     convert arg: <input id="convert_arg" size="32" onclick="this.select();"></span>
   </div>
-  <button onclick="document.getElementById('convert_arg').select(); document.execCommand('copy'); window.close();">
+  <button
+    onclick="navigator.clipboard.writeText(document.getElementById('convert_arg').value); setTimeout(function() { window.close(); }, 1000);">
     Go!
   </button>
   <div style="margin-top: 2em; position: relative;">
