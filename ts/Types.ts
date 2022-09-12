@@ -55,6 +55,11 @@ namespace OcrResult {
   export type Symbol = {
     confidence: number,
     text: string,
+    property?: {
+      detectedBreak?: {
+        'type'?: string,
+      },
+    },
   };
 };
 
