@@ -30,7 +30,7 @@ export class OcrTask {
           batchSize: 20,
         };
         const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
-        const imageContext = { disableOrientationDetection: true };
+        const imageContext = {};
         const request = {
           requests: [{ inputConfig, features, imageContext, outputConfig }],
         };
