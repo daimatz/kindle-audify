@@ -26,12 +26,13 @@ export function main(gcsPath: string, config: Config): Promise<void> {
 
   const basename = path.parse(gcsPath.normalize()).name;
   const timestamp = new Date().getTime();
+  const dt = new Date(timestamp).toISOString().replace(/T.+$/, '').replaceAll('-', '');
   const working_dir = `${config.temp_path}/${timestamp}_${basename}`;
   return promiseRetry((retry, count) => {
     return ocr.run(gcsPath, `${working_dir}/json`)
       .then(files => ext.run(files, `${working_dir}/text`))
       .then(texts => tts.run(texts, `${working_dir}/mp3`))
-      .then(files => concat.run(files, `${config.output_path}/${basename}.mp3`))
+      .then(files => concat.run(files, `${config.output_path}/${dt}_${basename}.mp3`))
       .then(() => void(0));
   }, { retries: 3, factor: 1 });
 }
