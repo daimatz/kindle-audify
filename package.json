@@ -15,7 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "local": "node build/run-local.js",
-    "deploy": "gcloud functions deploy PdfAudify --runtime nodejs14 --trigger-event google.storage.object.finalize --memory 2048 --timeout 540s --env-vars-file env.yaml --trigger-resource"
+    "deploy": "gcloud functions deploy PdfAudify --runtime nodejs16 --trigger-event google.storage.object.finalize --memory 2048 --timeout 540s --env-vars-file env.yaml --trigger-resource"
   },
   "repository": {
     "type": "git",
