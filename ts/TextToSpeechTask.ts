@@ -8,7 +8,7 @@ export class TextToSpeechTask {
   private readonly client: typeof TextToSpeech.TextToSpeechClient;
   private readonly voiceName: string;
   private readonly config: Config;
-  private readonly maxLength = 5000;
+  private readonly maxLength = 500;
 
   constructor(gcs: GcsLib, voiceName: string, config: Config) {
     this.gcs = gcs;
@@ -26,6 +26,7 @@ export class TextToSpeechTask {
       let i = 0;
       while (i < texts.length) {
         const chunk = this.takeChunk(texts, i);
+        console.log(chunk);
 
         const outputPath = this.getOutputPath(outputPrefix, ++num);
         if (existFiles.some(f => f.endsWith(outputPath))) {
@@ -72,7 +73,7 @@ export class TextToSpeechTask {
       voice: {
         name: this.voiceName,
         languageCode: this.config.language_code,
-        ssmlGender: 'NEUTRAL',
+        ssmlGender: Math.random() < 0.5 ? 'MALE' : 'FEMALE',
       },
       audioConfig: {
         audioEncoding: 'MP3',
@@ -88,6 +89,9 @@ export class TextToSpeechTask {
         console.log(`ttsRequest(..., ${outputPath}) done.`);
         w.end('', 'binary', () => resolve(outputPath));
       });
+    }).catch((e) => {
+      console.error(e);
+      throw e;
     });
   }
 }
