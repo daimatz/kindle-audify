@@ -48,7 +48,7 @@ function onMouseDown (e) {
   rectDom.addEventListener ("mousemove", onMouseMove, false);
 }
 function onMouseMove (e) {
-  draw();
+  draw(true);
   _rectangle.endY = e.layerY - _rectangle.startY;
   _rectangle.endX = e.layerX - _rectangle.startX;
   context.lineWidth = 3;
@@ -56,8 +56,8 @@ function onMouseMove (e) {
   context.strokeRect (_rectangle.startX, _rectangle.startY, _rectangle.endX, _rectangle.endY);
 }
 function onMouseUp (e) {
-  draw();
-  _rectangle = createRect();
+  draw(true);
+  // _rectangle = createRect();
   rectDom.removeEventListener ("mousemove", onMouseMove, false);
 }
 
@@ -70,12 +70,14 @@ function normalize(r) {
   };
 }
 
-function draw() {
+function draw(update) {
   context.clearRect(0, 0, rectDom.width, rectDom.height);
   context.lineWidth = 3;
   context.strokeStyle = "rgb(255, 0, 0)";
   var r = _rectangle;
   context.strokeRect(r.startX, r.startY, r.endX, r.endY);
+
+  if (!update) { return; }
 
   var n = normalize(_rectangle);
   if (n.endX * n.endY === 0) {
@@ -105,7 +107,7 @@ function resize() {
 
 rectDom.addEventListener("mousedown", onMouseDown, false);
 rectDom.addEventListener("mouseup" , onMouseUp , false);
-imageDom.addEventListener('load', resize, false);
+imageDom.addEventListener('load', function() { resize(); draw(false); }, false);
 
 renderPage();
   </script>
